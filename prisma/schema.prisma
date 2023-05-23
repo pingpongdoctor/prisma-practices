@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model UserProfile {
+  id        Int      @id @default(autoincrement())
+  username  String
+  password  String
+  createdAt DateTime @default(now())
+  userInfor UserGeneralInfo?
+}
+
+model Mentor {
+  id        Int      @id @default(autoincrement())
+  name      String
+  age       Int
+  createdAt DateTime @default(now())
+  userGeneralInfor UserGeneralInfo[]
+}
+
+
+model Todo {
+  id   Int    @id @default(autoincrement())
+  name String
+}
+
+//USE IMPLICIT MANY-TO-MANY RELATIONSHIP FOR TEACHER AND USER INFOR TABLES
+model Teacher {
+  id        Int      @id @default(autoincrement())
+  name      String
+  like      Int
+  createdAt DateTime @default(now())
+  userGeneralInfo UserGeneralInfo[]
+
+}
+
+model UserGeneralInfo {
+  id         Int       @id @default(autoincrement())
+  age        Int
+  birthday   DateTime
+  email String? 
+  createdAt  DateTime @default(now())
+  //SET CASCADE TO DELETE PROFILE WHEN USER INFOR IS DELETED
+  profile UserProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId  Int @unique 
+  //SET NULL TO NOT DELETE USER GENERAL INFOR RECORD WHEN THE CORRESPONDING MENTOR RECORD IS DELETED
+  mentor     Mentor?  @relation(fields: [mentorId], references: [id], onDelete: SetNull)
+  mentorId   Int?
+  teacher Teacher[]
+}
+
